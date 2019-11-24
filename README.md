@@ -13,7 +13,7 @@ A small Crystal shard to extend native spec with:
 1. Add the dependency to your `shard.yml`:
 
    ```yaml
-   dependencies:
+   development_dependencies:
      extend_spec:
        github: clouw/extend_spec
    ```
