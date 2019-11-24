@@ -47,9 +47,21 @@ module ExtendSpec
     end
 
     macro it(name = "anonymous", **options, &block)
-      def test_{{ name.strip.gsub(/[^0-9a-zA-Z:]+/, "_").id }}_line{{block.line_number}}
+      test_with(:it, {{name}}, {{**options}}) { {{yield}} }
+    end
+
+    macro pending(name = "anonymous", **options, &block)
+      test_with(:pending, {{name}}, {{**options}}) { {{yield}} }
+    end
+
+    macro fail(name = "anonymous", **options, &block)
+      test_with(:fail, {{name}}, {{**options}}) { {{yield}} }
+    end
+
+    macro test_with(spec_type, name = "anonymous", **options, &block)
+      def test_{{ name.strip.gsub(/[^0-9a-zA-Z:]+/, "_").id }}_line{{block ? block.line_number : "nn".id}}
         setup
-        ExtendSpec::Wrapper.it({{name}}, {{**options}}) { {{yield}} }
+        ExtendSpec::Wrapper.{{spec_type.id}}({{name}}, {{**options}}) {% if block %} { {{yield}} } {% end %}
       ensure
         teardown
       end
