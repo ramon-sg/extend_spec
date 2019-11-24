@@ -1,0 +1,9 @@
+name: extend_spec
+version: 0.1.0
+
+authors:
+  - Ramón Soto <ddsstr@gmail.com>
+
+crystal: 0.30.1
+
+license: MIT
