@@ -2,14 +2,22 @@ module ExtendSpec
   class Spec(T)
     getter described_class = T
 
-    macro let(*name, &block)
-      getter {{*name}} do
+    macro let(*names, file = __FILE__, line = __LINE__, &block)
+      {% if names.size != 1 %}
+        {{ raise "Only one argument can be passed to `let(#{names.join(", ").id})` #{file.id}:#{line.id} #{__DIR__}" }}
+      {% end %}
+
+      getter {{*names}} do
         {{yield}}
       end
     end
 
-    macro let!(*name, &block)
-      getter({{*name}}) { {{yield}} }
+    macro let!(*names, &block)
+      {% if names.size != 1 %}
+        {{ raise "Only one argument can be passed to `let!(#{names.join(", ").id})` #{file.id}:#{line.id} #{__DIR__}" }}
+      {% end %}
+
+      getter({{*names}}) { {{yield}} }
 
       {% if name.is_a?(TypeDeclaration) %}
         {{name.var.id}}
