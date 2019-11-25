@@ -60,10 +60,12 @@ module ExtendSpec
 
     macro test_with(spec_type, name = "anonymous", **options, &block)
       def test_{{ name.strip.gsub(/[^0-9a-zA-Z:]+/, "_").id }}_line{{block ? block.line_number : "nn".id}}
-        setup
-        ExtendSpec::Wrapper.{{spec_type.id}}({{name}}, {{**options}}) {% if block %} { {{yield}} } {% end %}
-      ensure
-        teardown
+        ExtendSpec::Wrapper.{{spec_type.id}}({{name}}, {{**options}}) {% if block %} do {% end %}
+          setup
+          {{yield}}
+        ensure
+          teardown
+        {% if block %} end {% end %}
       end
     end
 
