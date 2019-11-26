@@ -1,10 +1,13 @@
 module ExtendSpec
+  module Methods
+  end
+
   class Spec(T)
     getter described_class = T
 
     macro let(*names, file = __FILE__, line = __LINE__, &block)
       {% if names.size != 1 %}
-        {{ raise "Only one argument can be passed to `let(#{names.join(", ").id})` #{file.id}:#{line.id} #{__DIR__}" }}
+        {{ raise "Only one argument can be passed to `let(#{names.join(", ").id})` #{file.id}:#{line.id}" }}
       {% end %}
 
       getter {{*names}} do
@@ -14,24 +17,25 @@ module ExtendSpec
 
     macro let!(*names, &block)
       {% if names.size != 1 %}
-        {{ raise "Only one argument can be passed to `let!(#{names.join(", ").id})` #{file.id}:#{line.id} #{__DIR__}" }}
+        {{ raise "Only one argument can be passed to `let!(#{names.join(", ").id})` #{file.id}:#{line.id}" }}
       {% end %}
 
       getter({{*names}}) { {{yield}} }
 
-      {% if name.is_a?(TypeDeclaration) %}
-        {{name.var.id}}
+      {% if names.is_a?(TypeDeclaration) %}
+        {{names.var.id}}
       {% else %}
-        {{name.id}}
+        {{names.id}}
       {% end %}
     end
 
     macro subject(&block)
-      let(subject : T) { {{yield}} }
+      getter(subject : T) { {{yield}} }
     end
 
     macro subject!(&block)
-      let!(subject : T) { {{yield}} }
+      getter(subject : T) { {{yield}} }
+      subject
     end
 
     def setup
@@ -67,13 +71,15 @@ module ExtendSpec
     end
 
     macro test_with(spec_type, name = "anonymous", **options, &block)
-      def test_{{ name.strip.gsub(/[^0-9a-zA-Z:]+/, "_").id }}_line{{block ? block.line_number : "nn".id}}
-        ExtendSpec::Wrapper.{{spec_type.id}}({{name}}, {{**options}}) {% if block %} do {% end %}
-          setup
-          {{yield}}
-        ensure
-          teardown
-        {% if block %} end {% end %}
+      class It < {{ @type.id }}
+        def test_{{ name.strip.gsub(/[^0-9a-zA-Z:]+/, "_").id }}_line{{block ? block.line_number : "nn".id}}
+          ExtendSpec::Wrapper.{{spec_type.id}}({{name}}, {{**options}}) {% if block %} do {% end %}
+            setup
+            {{yield}}
+          ensure
+            teardown
+          {% if block %} end {% end %}
+        end
       end
     end
 
@@ -88,7 +94,7 @@ module ExtendSpec
     macro describe_or_context(spec_type, text, &block)
       {%
         class_name = text.id.stringify
-          .gsub(/[^0-9a-zA-Z:]+/, "_")
+          .gsub(/[^0-9a-zA-Z]+/, "_")
           .gsub(/^_|_$/, "")
           .split("_").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("")
           .split("::").map { |s| [s[0...1].upcase, s[1..-1]].join("") }.join("::") \
@@ -96,8 +102,14 @@ module ExtendSpec
       %}
 
       class {{ class_name.id }}Spec < {{ @type }}
-        SPEC_TEXT = {{text}}
-        SPEC_TYPE = {{spec_type}}
+        class It < {{ class_name.id }}Spec
+          macro finished
+            include ExtendSpec::Methods
+          end
+
+          SPEC_TEXT = {{text}}
+          SPEC_TYPE = {{spec_type}}
+        end
 
         {{ yield }}
       end
@@ -105,17 +117,17 @@ module ExtendSpec
 
     macro __run_tests__
       {% for name in @type.methods.map(&.name).select(&.starts_with?("test_")) %}
-      {{@type}}.new.{{name}}
+        {{@type}}.new.{{name}}
       {% end %}
 
       {% for sub_class_name in @type.subclasses %}
-      {% if sub_class_name.constant("SPEC_TEXT") == "" %}
-      {{sub_class_name}}.__run_tests__
-      {% else %}
-      ExtendSpec::Wrapper.{{sub_class_name.constant("SPEC_TYPE").id}} {{sub_class_name.constant("SPEC_TEXT")}} do
-        {{sub_class_name}}.__run_tests__
-      end
-      {% end %}
+        {% if sub_class_name.constant("SPEC_TEXT") || sub_class_name.constant("SPEC_TYPE") == nil %}
+          {{sub_class_name}}.__run_tests__
+          {% else %}
+          ExtendSpec::Wrapper.{{sub_class_name.constant("SPEC_TYPE").id}} {{sub_class_name.constant("SPEC_TEXT")}} do
+            {{sub_class_name}}.__run_tests__
+          end
+        {% end %}
       {% end %}
     end
   end

@@ -9,6 +9,8 @@ describe DummyDB do
   before { Dir.mkdir dir }
   after { FileUtils.rm_rf dir }
 
+  it { subject.should be_a(DummyDB) }
+
   describe "#name" do
     it { subject.name.should eq(name) }
   end
