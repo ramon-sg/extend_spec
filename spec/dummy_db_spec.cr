@@ -4,7 +4,7 @@ describe DummyDB do
   let(name) { "prod.db" }
   let(dir : String) { File.tempname }
 
-  subject { described_class.new(dir, name) }
+  subject { Described.new(dir, name) }
 
   before { Dir.mkdir dir }
   after { FileUtils.rm_rf dir }
@@ -16,10 +16,18 @@ describe DummyDB do
   end
 
   describe "#set" do
-    it "saves value" do
-      subject.set("key1", "value1")
+    before { subject.set("key1", "value1") }
 
+    it "saves value" do
       subject.store.should eq({"key1" => "value1"})
+    end
+
+    context "some" do
+      before { subject.set("key1", "value2") }
+
+      it "saves value" do
+        subject.store.should eq({"key1" => "value2"})
+      end
     end
   end
 

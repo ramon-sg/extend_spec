@@ -17,11 +17,16 @@
 
 directories %w(src spec)
 
-ignore /file_server_worker/, %r{/log.cr}
+ignore %r{/log.cr}
 
 clearing :on
 
-guard :exec, name: 'Spec', command: 'crystal spec' do
+guard :exec, first_match: true, name: 'Spec', command: 'crystal spec' do
+  watch(%r{^src/extend_spec\.cr}) { 'spec' }
+  watch(%r{^src/((.*).+)\.cr$}) { |m| "spec/#{m[1]}_spec.cr" }
+
   watch(%r{^spec/spec_helper\.cr}) { 'spec' }
-  watch(%r{^src/(.*)\.cr}) { 'spec/dummy_db_spec.cr' }
+  watch(%r{^spec/(.*)_spec\.cr})
+
+  # watch(%r{^src/(.*)\.cr}) { 'spec/dummy_db_spec.cr' }
 end

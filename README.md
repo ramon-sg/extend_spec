@@ -4,7 +4,7 @@ A small Crystal shard to extend native spec with:
 
 - No global scope pollution
 - No Object pollution
-- Add `described_class` method
+- Add `Described` alias for Class or Module
 - Ability to specify `before` and `after` blocks
 - Ability to define `let`, `let!`, `subject` and `subject!`
 
@@ -47,7 +47,7 @@ describe Ninja do
   let(name) { "Kakashi" }
   let(last_name : String) { "Hatake" }
 
-  subject { described_class.new(last_name, name) }
+  subject { Described.new(last_name, name) }
 
   describe "#full_name" do
     it "returns full name" do
