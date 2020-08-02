@@ -1,6 +1,6 @@
 FROM qixtand/debian-stretch-ruby:2.4.5
 
-ARG CRYSTAL_URL=https://github.com/crystal-lang/crystal/releases/download/0.30.1/crystal_0.30.1-1_amd64.deb
+ARG CRYSTAL_URL=https://github.com/crystal-lang/crystal/releases/download/0.35.1/crystal_0.35.1-1_amd64.deb
 
 # Crystal
 RUN apt-get update
