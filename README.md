@@ -15,7 +15,7 @@ A small Crystal shard to extend native spec with:
    ```yaml
    development_dependencies:
      extend_spec:
-       github: clouw/extend_spec
+       github: ramon-sg/extend_spec
    ```
 
 2. Run `shards install`
@@ -69,7 +69,7 @@ Real example in `spec/dummy_db_spec.cr`
 
 ## Contributing
 
-1. Fork it (<https://github.com/clouw/extend_spec/fork>)
+1. Fork it (<https://github.com/ramon-sg/extend_spec/fork>)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
